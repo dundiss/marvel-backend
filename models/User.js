@@ -14,10 +14,9 @@ const User = mongoose.model("User", {
         },
         avatar: Object,
     },
-    newsletter: Boolean,
     token: String,
     hash: String,
-    salt: String,
+    salt: String
 });
 
 module.exports = User;

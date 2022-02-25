@@ -7,23 +7,21 @@ const uid2 = require("uid2");
 
 //import des models
 const User = require("../models/User");
-
-const generateSalt = (length = 16) => {
+const LENGTH = 32;
+const generateSalt = (length = LENGTH) => {
     //console.log(length);
     return uid2(length);
 };
 
 //Fonction de génération d'un Hash
-const generateHash = (salt, password) => {
+const generateHash = (password, salt) => {
     return SHA256(password + salt).toString(encBase64);
 };
 
 // Fonction de génération d'un token
-const generateToken = (length = 16) => {
+const generateToken = (length = LENGTH) => {
     return uid2(length);
 };
-
-//console.log("salt " + generateSalt(32));
 
 //Fonction de sauvegarde d'un utilisateur dans la BDD
 const saveUser = async (username, email, salt, hash, token) => {
@@ -64,19 +62,17 @@ router.post("/user/signup", async (req, res) => {
         const foundUser = await getUser(email);
         //console.log(foundUser);
         if (!foundUser) {
-            const password = req.fields.password;
-            const username = req.fields.username;
-            const phone = req.fields.phone;
+            const { password, username } = req.fields;
 
             if (username && password) {
 
-                const salt = generateSalt(64);
+                const salt = generateSalt();
 
                 const hash = generateHash(password + salt);
 
-                const token = generateToken(64);
+                const token = generateToken();
 
-                const newUser = await saveUser(username, email, phone, salt, hash, token);
+                const newUser = await saveUser(username, email, salt, hash, token);
 
                 res.json({ newUser });
             }
@@ -98,8 +94,12 @@ router.post("/user/signup", async (req, res) => {
 router.post("/user/login", async (req, res) => {
     try {
         const user = await getUser(req.fields.email);
+        console.log(user);
         if (user) {
-            hash = generateHash(req.fields.password + user.salt);
+            const hash = generateHash(req.fields.password + user.salt);
+            console.log("salt", user.salt);
+            console.log("hash", hash);
+            console.log("user.hash", user.hash);
             if (user.hash === hash) {
                 res.json({
                     "_id": user._id,
@@ -111,7 +111,7 @@ router.post("/user/login", async (req, res) => {
                 });
             }
             else {
-                res.status(409).json({ message: "acces unauthorized !" });
+                res.status(409).json({ message: "Acces unauthorized !" });
             }
         }
         else {
