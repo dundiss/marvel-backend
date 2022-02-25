@@ -6,7 +6,7 @@ const router = express.Router();
 
 // Import du model User et Favorite
 // afin d'éviter des erreurs (notamment dues à d'eventuelles références entre les collections)
-// nous vous conseillons d'importer tous vos models dans toutes vos routes
+// on importe tous les models dans toutes les routes
 const User = require("../models/User");
 const Favorite = require("../models/Favorite");
 
@@ -20,20 +20,25 @@ router.get("/favorites", async (req, res) => {
         // création d'un objet dans lequel on va sotcker nos différents filtres
         let filters = {};
 
-        if (req.query.title) {
-            filters.comics_name = new RegExp(req.query.title, "i");
+        if (req.query.characterId) {
+            filters.character_id = new RegExp(req.query.characterId, "i");
         }
 
         let sort = {};
 
-        let page;
-        if (Number(req.query.page) < 1) {
-            page = 1;
-        } else {
-            page = Number(req.query.page);
-        }
+        let page = 1;
+        if (req.query.page) {
+            if (Number(req.query.page) < 1) {
+                page = 1;
+            } else {
+                page = Number(req.query.page);
+            }
+        }        
 
-        let limit = Number(req.query.limit);
+        let limit = 1;
+        if (req.query.limit) {
+            limit = Number(req.query.limit);
+        }
 
         const favorites = await Favorite.find(filters)
             .populate({
@@ -58,29 +63,34 @@ router.get("/favorites", async (req, res) => {
 });
 
 // Route qui permmet de récupérer les informations d'un favori en fonction de son id
-router.get("/favorite/:id", async (req, res) => {
+router.get("/favorite/:characterId", async (req, res) => {
     try {
-        const favorite = await Favorite.findById(req.params.id).populate({
+        const favorite = await Favorite.findOne({characterId : req.params.characterId}).populate({
             path: "owner",
             select: "account.username account.avatar",
         });
-        res.json(favorite);
+        if (favorite) {
+            res.json(favorite);
+        }
+        else {
+            res.status(400).json({ message: "characterId not found!" });
+        }
     } catch (error) {
         console.log(error.message);
         res.status(400).json({ message: error.message });
     }
 });
 
-router.post("/favorite/add", isAuthenticated, async (req, res) => {
+router.put("/favorites/add/:characterId", isAuthenticated, async (req, res) => {
     // route qui permet d'ajouter un nouveau favori
     try {
-        const { id } =
-            req.fields;
+        const { characterId } =
+            req.params;
 
-        if (title && price && req.files.picture.path) {
+        if (characterId ) {
             // Création du nouveau favori
             const newFavorite = new Favorite({
-                comics_id: id,
+                characterId: characterId,
                 owner: req.user,
             });
 
@@ -89,7 +99,7 @@ router.post("/favorite/add", isAuthenticated, async (req, res) => {
         } else {
             res
                 .status(400)
-                .json({ message: "id is required" });
+                .json({ message: "characterId is required" });
         }
     } catch (error) {
         console.log(error.message);
@@ -97,10 +107,10 @@ router.post("/favorite/add", isAuthenticated, async (req, res) => {
     }
 });
 
-router.delete("/favorite/delete/:id", isAuthenticated, async (req, res) => {
+router.delete("/favorites/delete/:characterId", isAuthenticated, async (req, res) => {
     try {
 
-        const favoriteToDelete = await Favorite.findById(req.params.id);
+        const favoriteToDelete = await Favorite.findOne({characterId : req.params.characterId});
 
         await favoriteToDelete.delete();
 
