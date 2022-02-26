@@ -122,7 +122,7 @@ router.get("/favorites", isAuthenticated, async (req, res) => {
 });
 
 // Route qui permmet de récupérer les informations d'un favori en fonction de son id
-router.get("/favorites/:category/:id", isAuthenticated, async (req, res) => {
+router.get("/favorite/:category/:id", isAuthenticated, async (req, res) => {
     try {
         const favorite = await Favorite.findOne({favId : req.params.id}).populate({
             path: "owner",
@@ -144,7 +144,7 @@ router.get("/favorites/:category/:id", isAuthenticated, async (req, res) => {
     }
 });
 
-router.put("/favorites/add/:category/:id", isAuthenticated, async (req, res) => {
+router.put("/favorite/add/:category/:id", isAuthenticated, async (req, res) => {
     // route qui permet d'ajouter un nouveau favori
     try {
         const { category, id } =
@@ -186,7 +186,7 @@ router.put("/favorites/add/:category/:id", isAuthenticated, async (req, res) => 
     }
 });
 
-router.delete("/favorites/delete/:category/:id", isAuthenticated, async (req, res) => {
+router.delete("/favorite/delete/:category/:id", isAuthenticated, async (req, res) => {
     try {
         const { category, id } = req.params;
         const favoriteToDelete = await Favorite.findOne({ favId: id, category: category});
