@@ -70,10 +70,10 @@ router.get("/favorites", isAuthenticated, async (req, res) => {
 
         console.log("total length", selectedFavorites.length)
         if (selectedFavorites.length > 0) {
-            res.json({ results: selectedFavorites });
+            res.json({ results: selectedFavorites, count: selectedFavorites.length});
         }
         else {
-            res.status(400).json({ message: "User has no favorite" });
+            res.status(200).json({ count: 0 });
         }
 
         // création d'un objet dans lequel on va sotcker nos différents filtres
