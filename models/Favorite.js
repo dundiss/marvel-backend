@@ -1,7 +1,12 @@
 const mongoose = require("mongoose");
 
 const Favorite = mongoose.model("Favorite", {
-    characterId: String,
+    favId: String,
+    category: {
+        type: String,
+        enum: ['undefined', 'character', 'comic'],
+        default: 'undefined'
+    },
     owner: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",

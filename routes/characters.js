@@ -7,10 +7,22 @@ const router = express.Router();
 // Import du middleware isAuthenticated
 const isAuthenticated = require("../middlewares/isAuthenticated");
 
-router.get('/characters', isAuthenticated, async (req, res) => {
+router.get('/characters', /*isAuthenticated,*/ async (req, res) => {
     try {
         const response = await axios.get(
             `https://lereacteur-marvel-api.herokuapp.com/characters?apiKey=${process.env.MARVEL_API_KEY}`
+        );
+        //console.log(response.data);
+        res.json(response.data);
+    } catch (error) {
+        console.error(error.message);
+    }
+});
+
+router.get('/characters/:id', /*isAuthenticated,*/ async (req, res) => {
+    try {
+        const response = await axios.get(
+            `https://lereacteur-marvel-api.herokuapp.com/character/${req.params.id}?apiKey=${process.env.MARVEL_API_KEY}`
         );
         //console.log(response.data);
         res.json(response.data);

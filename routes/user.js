@@ -39,13 +39,10 @@ const saveUser = async (username, email, salt, hash, token) => {
     await newUser.save();
     //console.log("new User : " + newUser);
     return {
-        message: {
-            "_id": newUser._id,
-            "token": newUser.token,
-            "account": {
-                "username": newUser.account.username
-            }
-        }
+        _id: newUser._id,
+        email: newUser.email,
+        token: newUser.token,
+        account: newUser.account
     };
 };
 
@@ -74,7 +71,7 @@ router.post("/user/signup", async (req, res) => {
 
                 const newUser = await saveUser(username, email, salt, hash, token);
 
-                res.json({ newUser });
+                res.status(200).json(newUser);
             }
             else {
                 res.status(409).json({ error: { message: "Bad request" } });
