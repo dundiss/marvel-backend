@@ -152,26 +152,34 @@ router.put("/favorite/add/:category/:id", isAuthenticated, async (req, res) => {
 
         if (id && category) {
             if ((category === 'character') || (category === 'comic')) {
-                const response = await axios.get(
-                    `https://lereacteur-marvel-api.herokuapp.com/${category}/${id}?apiKey=${process.env.MARVEL_API_KEY}`
-                );
+                const foundFavorite = await Favorite.findOne({ favId: id, category: category })
+                    .populate({ path: 'owner', match: { _id: { $eq: userId } }, select: '_id' });
+                if (!foundFavorite) {
+                    const response = await axios.get(
+                        `https://lereacteur-marvel-api.herokuapp.com/${category}/${id}?apiKey=${process.env.MARVEL_API_KEY}`
+                    );
 
-                const { _id } = response.data;
-                //Double verification
-                if (_id === id) {
-                    // Création du nouveau favori
-                    const newFavorite = new Favorite({
-                        favId: id,
-                        category: category,
-                        owner: req.user,
-                    });
+                    const { _id } = response.data;
+                    //Double verification
+                    if (_id === id) {
+                        // Création du nouveau favori
+                        const newFavorite = new Favorite({
+                            favId: id,
+                            category: category,
+                            owner: req.user,
+                        });
 
-                    await newFavorite.save();
-                    res.json(newFavorite);
+                        await newFavorite.save();
+                        res.json(newFavorite);
+                    }
+                    else {
+                        res.status(400).json({ message: "Wrong favorite Id" });
+                    }
                 }
                 else {
-                    res.status(400).json({ message: "Wrong favorite Id" });
+                    res.json({message: "Favorite already present!"});
                 }
+                
             }
         }
          else {
