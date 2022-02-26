@@ -153,7 +153,7 @@ router.put("/favorite/add/:category/:id", isAuthenticated, async (req, res) => {
         if (id && category) {
             if ((category === 'character') || (category === 'comic')) {
                 const foundFavorite = await Favorite.findOne({ favId: id, category: category })
-                    .populate({ path: 'owner', match: { _id: { $eq: userId } }, select: '_id' });
+                    .populate({ path: 'owner', match: { _id: { $eq: req.user._id } }, select: '_id' });
                 if (!foundFavorite) {
                     const response = await axios.get(
                         `https://lereacteur-marvel-api.herokuapp.com/${category}/${id}?apiKey=${process.env.MARVEL_API_KEY}`
