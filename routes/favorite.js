@@ -192,7 +192,7 @@ router.delete("/favorite/delete/:category/:id", isAuthenticated, async (req, res
         const favoriteToDelete = await Favorite.findOne({ favId: id, category: category });
 
         await favoriteToDelete.delete();
-        console("Id " + id + " " + "is deleted")
+        console.log("Id " + id + " " + "is deleted")
         res.status(200).json("Favorite deleted succesfully !");
     } catch (error) {
         console.log(error.message);
