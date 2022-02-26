@@ -19,7 +19,7 @@ router.get('/comics', /*isAuthenticated,*/ async (req, res) => {
     }
 });
 
-router.get('/comics/:id', /*isAuthenticated,*/ async (req, res) => {
+router.get('/comic/:id', /*isAuthenticated,*/ async (req, res) => {
     try {
         const response = await axios.get(
             `https://lereacteur-marvel-api.herokuapp.com/comic/${req.params.id}?apiKey=${process.env.MARVEL_API_KEY}`
