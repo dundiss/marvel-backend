@@ -16,14 +16,26 @@ const isAuthenticated = require("../middlewares/isAuthenticated");
 const { query } = require("express");
 
 const processFavorites = async (favoritesTab, results, userId, category) => {
-    for await (const element of results) {
-        const favorite = await Favorite.findOne({ favId: element._id, category: category })
-            .populate({ path: 'owner', match: { _id: { $eq: userId } }, select: '_id' });
+    // for await (const element of results) {
+    //     const favorite = await Favorite.findOne({ favId: element._id, category: category })
+    //         .populate({ path: 'owner', match: { _id: { $eq: userId } }, select: '_id' });
 
-        if (favorite && favorite.owner) {
+    //     if (favorite && favorite.owner) {
+    //         console.log('favorite', favorite);
+    //         // console.log('favorite', favorite);
+    //         // console.log("element", element);
+    //         favoritesTab.push(element);
+    //         console.log('selectedFavorites.length', favoritesTab.length);
+    //     }
+    // };
+    const favorites = await Favorite.find({ category: category })
+        .populate({ path: 'owner', match: { _id: { $eq: userId } }, select: '_id' });
+
+    for await (const favorite of favorites) {
+        const element = results.find({ _id: favorite.favId });
+
+        if (element) {
             console.log('favorite', favorite);
-            // console.log('favorite', favorite);
-            // console.log("element", element);
             favoritesTab.push(element);
             console.log('selectedFavorites.length', favoritesTab.length);
         }
@@ -75,46 +87,6 @@ router.get("/favorites", isAuthenticated, async (req, res) => {
         else {
             res.status(200).json({ count: 0 });
         }
-
-        // création d'un objet dans lequel on va sotcker nos différents filtres
-        // let filters = {};
-
-        // if (req.query.id) {
-        //     filters.favId = new RegExp(req.query.id, "i");
-        // }
-
-        // let sort = {};
-
-        // let page = 1;
-        // if (req.query.page) {
-        //     if (Number(req.query.page) < 1) {
-        //         page = 1;
-        //     } else {
-        //         page = Number(req.query.page);
-        //     }
-        // }        
-
-        // let limit = 100;
-        // if (req.query.limit) {
-        //     limit = Number(req.query.limit);
-        // }
-
-        // const favorites = await Favorite.find(filters)
-        //     .populate({
-        //         path: "owner",
-        //         select: "account",
-        //     })
-        //     .sort(sort)
-        //     .skip((page - 1) * limit) // ignorer les x résultats
-        //     .limit(limit); // renvoyer y résultats
-
-        // // cette ligne va nous retourner le nombre de favoris trouvées en fonction des filtres
-        // const count = await Favorite.countDocuments(filters);
-
-        // res.json({
-        //     count: count,
-        //     favorites: favorites,
-        // });
     } catch (error) {
         console.log(error.message);
         res.status(400).json({ message: error.message });
