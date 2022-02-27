@@ -9,7 +9,7 @@ const isAuthenticated = require("../middlewares/isAuthenticated");
 
 router.get('/comics', /*isAuthenticated,*/ async (req, res) => {
     try {
-        let url = `https://lereacteur-marvel-api.herokuapp.com/comics?apiKey=${process.env.MARVEL_API_KEY}`;
+        let url = `https://lereacteur-marvel-api.herokuapp.com/comics`;
         console.log(req.query);
         const { title, skip, limit } = req.query;
         const params = {}
@@ -28,7 +28,7 @@ router.get('/comics', /*isAuthenticated,*/ async (req, res) => {
         }
 
 
-        const response = await axios.get( url );
+        const response = await axios.get(url, { params } );
         //console.log(response.data);
         res.json(response.data);
     } catch (error) {
