@@ -16,28 +16,25 @@ const isAuthenticated = require("../middlewares/isAuthenticated");
 const { query } = require("express");
 
 const processFavorites = async (favoritesTab, results, userId, category) => {
-    // for await (const element of results) {
-    //     const favorite = await Favorite.findOne({ favId: element._id, category: category })
-    //         .populate({ path: 'owner', match: { _id: { $eq: userId } }, select: '_id' });
-
-    //     if (favorite && favorite.owner) {
-    //         console.log('favorite', favorite);
-    //         // console.log('favorite', favorite);
-    //         // console.log("element", element);
-    //         favoritesTab.push(element);
-    //         console.log('selectedFavorites.length', favoritesTab.length);
-    //     }
-    // };
     const favorites = await Favorite.find({ category: category })
         .populate({ path: 'owner', match: { _id: { $eq: userId } }, select: '_id' });
 
-    for await (const favorite of favorites) {
-        const element = results.find({ _id: favorite.favId });
+    //console.log("favorites", favorites);
 
+    for await (const favorite of favorites) {
+        //console.log("favorite", favorite);
+        const element = results.find(element => {
+            if (element._id === favorite.favId) {
+                return element;
+            }
+        });
+        
         if (element) {
-            console.log('favorite', favorite);
+            //console.log("element", element);
+            //console.log('favorite', favorite);
             favoritesTab.push(element);
-            console.log('selectedFavorites.length', favoritesTab.length);
+            //console.log('favoritesTab', favoritesTab);
+            //console.log('selectedFavorites.length', favoritesTab.length);
         }
     };
 }
@@ -46,7 +43,6 @@ const processFavorites = async (favoritesTab, results, userId, category) => {
 // Si aucun filtre n'est envoyé, cette route renverra l'ensemble des favoris
 router.get("/favorites", isAuthenticated, async (req, res) => {
     try {
-        console.log(req.params);
         //Recherche des élements 
         const response = await axios.get(
             `https://lereacteur-marvel-api.herokuapp.com/characters?apiKey=${process.env.MARVEL_API_KEY}`
@@ -55,7 +51,7 @@ router.get("/favorites", isAuthenticated, async (req, res) => {
         const { results } = response.data;
         const selectedFavorites = [];
 
-        
+        console.log("results", results)
         if (results) {
             await processFavorites(selectedFavorites, results, req.user.id, "character");
             
