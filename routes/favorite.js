@@ -165,7 +165,8 @@ router.put("/favorite/add/:category/:id", isAuthenticated, async (req, res) => {
 router.delete("/favorite/delete/:category/:id", isAuthenticated, async (req, res) => {
     try {
         const { category, id } = req.params;
-        const favoriteToDelete = await Favorite.findOne({ favId: id, category: category });
+        const favoriteToDelete = await Favorite.findOne({ favId: id, category: category })
+            .populate({ path: 'owner', match: { _id: { $eq: req.user._id } }, select: '_id' });
 
         await favoriteToDelete.delete();
         console.log("Id " + id + " " + "is deleted")
